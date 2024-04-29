@@ -199,12 +199,18 @@ function update(){
     var whatPlayer = (ball.x < CANVAS_WIDTH/2) ? getPlayer(0) : getPlayer(1);
     if(collision(ball, whatPlayer)){
         // calculamos donde golpea la pelota en la pala;
-
+        var collidePoint = ball.y - (whatPlayer.y + whatPlayer.height/2);
         // normalizamos el punto de colision
+        collidePoint = collidePoint / (whatPlayer.height/2);
         // calculamos el agngulo de rebote (en radianes)
+        const angleRad = collidePoint * Math.PI/4
         // Calculamos el sentido de la pelota en la direccion x
+        const direction = (ball.x < CANVAS_HEIGHT.BALL_WIDTH/2) ? 1: -1; 
         // Calculamos la velocidad de la pelota en los ejes X e Y
+        ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+        ball.velocityY = ball.speed * Math.sin(angleRad);
         // Cada vez que la pelota choca con la pala la velocidad incrementa
+        ball.speed += BALL_DELTA_VELOCITY;
     }
     
 }
