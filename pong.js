@@ -74,7 +74,7 @@ function drawNet(){
         padding: NET_PADDING,
         color: NET_COLOR
     }
-    for(let i=0;i<=CANVAS_HEIGHT;i+net.padding){
+    for(let i=0;i<=CANVAS_HEIGHT;i+=net.padding){
         drawRect(net.x, net.y+i, net.width, net.height, net.color);
     }
 }
