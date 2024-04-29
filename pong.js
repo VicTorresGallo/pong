@@ -25,6 +25,8 @@ const BALL_COLOR = 'WHITE';
 const BALL_RADIUS = 10;
 const BALL_DELTA_VELOCITY = 0.5;
 const BALL_VELOCITY = 5;
+const BALL_WIDTH = 5;
+const BALL_HEIGHT = 5;
 
 const gameStateEnum = {
     SYNC: 0,
@@ -32,6 +34,7 @@ const gameStateEnum = {
     PAUSE: 2,
     END: 3,
 };
+
 //-------------------------------------------------------------------
 //--------------------------GRAPHICS ENGINE--------------------------
 //-------------------------------------------------------------------
@@ -94,29 +97,100 @@ const CANVAS_WIDTH = cvs.width;
 const CANVAS_HEIGHT= cvs.height;
 
 //declaramos los objetos del juego
+function drawPaddle(paddle){
+    drawRect(paddle.x,paddle.y,paddle.width,paddle.height,paddle.color);
+}
 
+function drawBall(ball){
+    drawCircle(ball.x,ball.y,ball.radio,ball.color);
+}
+//-------------------------------------------------------------------
+//--------------------------Motor de Juego --------------------------
+//-------------------------------------------------------------------
+//Declaramos los objetos del juego
+
+var gameState = gameStateEnum.SYNC;
 const players = {};
-
+var ball = {};
 
 //------GENERIC HELPERS------
-players[0]={
-    x:0,
-    y:CANVAS_HEIGHT/2-PADDLE_HEIGHT/2,
-    width:PADDLE_WIDTH,
-    height: PADDLE_HEIGHT,
-    color:PADDLE_LEFT_COLOR,
-    score:0
-}
-players[1]={
-    x:CANVAS_WIDTH-PADDLE_WIDTH,
-    y:CANVAS_HEIGHT/2-PADDLE_HEIGHT/2,
-    width:PADDLE_WIDTH,
-    height: PADDLE_HEIGHT,
-    color:PADDLE_RIGHT_COLOR,
-    score:0
+
+function getRandomDirection(){
+    return Math.floor(Math.random() * 2) === 0 ? -1 : 1;
 }
 
-drawBoard();
-drawCircle(50,60,BALL_RADIUS,BALL_COLOR);
-drawText('Saludos!!!!',200,200);
-drawScore(players);
+function getPlayer(){
+    return players[index];
+}
+function initGameObjects(){
+    players[0]={
+        x:0,
+        y:CANVAS_HEIGHT/2-PADDLE_HEIGHT/2,
+        width:PADDLE_WIDTH,
+        height: PADDLE_HEIGHT,
+        color:PADDLE_LEFT_COLOR,
+        score:0
+    }
+    players[1]={
+        x:CANVAS_WIDTH-PADDLE_WIDTH,
+        y:CANVAS_HEIGHT/2-PADDLE_HEIGHT/2,
+        width:PADDLE_WIDTH,
+        height: PADDLE_HEIGHT,
+        color:PADDLE_RIGHT_COLOR,
+        score:0
+    }
+    ball = {
+        x:BALL_WIDTH/2,
+        y:BALL_HEIGHT/2,
+        radius:BALL_RADIUS,
+        speed:BALL_VELOCITY,
+        velocityX:BALL_VELOCITY * getRandomDirection(),
+        velocityY:BALL_VELOCITY * getRandomDirection(),
+        color:BALL_COLOR
+    }
+}    
+
+function update(){
+    console.log("Actualizando estado...");
+}
+function render(){    
+    drawBoard();
+    drawScore(players);
+    drawPaddle(getPlayer(0));
+    drawPaddle(getPlayer(1));
+    drawBall(ball);
+    
+    drawCircle(50,60,BALL_RADIUS,BALL_COLOR);
+    drawText('Saludos!!!!',200,200);
+}
+function next(){
+    console.log("Siguiente estado ...");
+}
+
+//HELPERS para gestionar l bucle del juego
+var gameLoopId; //identificar el bucle del juego
+
+function gameLoop(){
+    update();
+    render();
+    next();
+}
+
+function initGameLoop(){
+    gameLoopId = setInterval(gameLoop, 1000/FRAME_PER_SECOND);
+    gameState = gameStateEnum.PLAY;
+}
+
+function stopGameLoop(){
+    clearInterval(gameLoopId);
+}
+
+//Inicializador global del motor de juego
+function init(){
+    initGameObjects();
+    drawBoard();
+    initGameLoop();
+}
+
+//Inicializacion del juego
+init();
