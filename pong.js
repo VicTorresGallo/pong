@@ -1,7 +1,7 @@
 'use strict'
 
 // Constantes básicas del juego
-const FRAME_PER_SECOND = 50;
+const FRAME_PER_SECOND = 50; //50 por defecto
 
 const NUM_BALLS = 5;
 
@@ -119,9 +119,10 @@ function getRandomDirection(){
     return Math.floor(Math.random() * 2) === 0 ? -1 : 1;
 }
 
-function getPlayer(){
+function getPlayer(index){
     return players[index];
 }
+
 function initGameObjects(){
     players[0]={
         x:0,
@@ -148,10 +149,64 @@ function initGameObjects(){
         velocityY:BALL_VELOCITY * getRandomDirection(),
         color:BALL_COLOR
     }
-}    
+}   
+//------------------Update Helpers ------------------------
+
+function collision(b,p){
+    //calculamos el collider de la pelota
+    b.top = b.y - b.radius;
+    b.bottom = b.y + b.radius;
+    b.left = b.x -b.radius;
+    b.right = b.x + b.radius;
+
+    //Calcular collider pala
+    p.top = p.y;
+    p.bottom = p.y + p.height;
+    p.left = p.x ;
+    p.right = p.x + p.width;
+
+    return  b.right     > p.left &&
+            b.bottom    > p.top &&
+            b.left      < p.left &&
+            b.top       < p.bottom;
+} 
+//IA Del juego
+const cCOMPUTER_LEVEL = 0.1;
+
+function updateNPC(){
+    const npc = getPlayer(1);
+
+    npc.i += (ball.i - (npc.y+npc.height/2)) * cCOMPUTER_LEVEL;
+
+
+}
+
 
 function update(){
-    console.log("Actualizando estado...");
+    //SI NO ESTAMOS EN PLAY, saltamos la actualizacion
+    if(gameState!= gameState.PLAY) return;
+
+    //pLAYER: ACTUALIZAMOS LA POS DE LA PELOTA
+    ball.x += ball.velocityX;
+    ball.y += ball.velocityY;
+    //IA: Actualizamos la pos de la computadora
+    updateNPC();
+    //Si la pelota golpea los laterales del campo rebotará;
+    if(ball.y + ball.radius > CANVAS_HEIGHT  || ball.y - ball.radius < 0) {
+        ball.velocityY = -ball.velocityY;
+    }
+//verificamos si la pelota golpea alguna pala;
+    var whatPlayer = (ball.x < CANVAS_WIDTH/2) ? getPlayer(0) : getPlayer(1);
+    if(collision(ball, whatPlayer)){
+        // calculamos donde golpea la pelota en la pala;
+
+        // normalizamos el punto de colision
+        // calculamos el agngulo de rebote (en radianes)
+        // Calculamos el sentido de la pelota en la direccion x
+        // Calculamos la velocidad de la pelota en los ejes X e Y
+        // Cada vez que la pelota choca con la pala la velocidad incrementa
+    }
+    
 }
 function render(){    
     drawBoard();
