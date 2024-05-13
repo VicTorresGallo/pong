@@ -42,7 +42,7 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
-const port = process.env.PORT||300;
+const port = process.env.PORT||3000;
 
 // SERVIDOR WEB --------------------------------------
 
@@ -56,6 +56,7 @@ function initWebServer(){
     app.get('/', (req,res)=>{
         res.sendFile(__dirname + '/index.html');
     });
+    
     server.listen(port, () =>{
         console.log(`Game server running on port ${port}`);
     });
