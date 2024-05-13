@@ -69,7 +69,7 @@ function initWebServer(){
 function initNetworkEngine(){
     //Definimos la interaccion
 
-    io.on('conection', (socket) =>{
+    io.on('connection', (socket) =>{
         console.log(`Nuevo Jugador`);
 
         socket.on('new player', ()=>{
