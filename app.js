@@ -50,7 +50,7 @@ const port = process.env.PORT||3000;
 
 function initWebServer(){
     // configuramos el servidor para servir el contenido desde la carpeta public
-    app.use(express.static(__dirname + 'public'));
+    app.use(express.static(__dirname + '/public'));
 
     // Indicamos la pagina por defecto
     app.get('/', (req,res)=>{
@@ -59,8 +59,11 @@ function initWebServer(){
     
     server.listen(port, () =>{
         console.log(`Game server running on port ${port}`);
+ 
     });
 }
+// me gusta la camisa de paco
+
 
 /// ---------------------------------------------------------
 // Servidor WEBSOCKET
@@ -103,24 +106,25 @@ const CANVAS_WIDTH = 600;
 const CANVAS_HEIGHT = 400;
 
 // Declaramos los objetos del juego
-var gameState = gameStateEnum.SYNC;
+let gameState = gameStateEnum.SYNC;
 const players = {};
-var ball ={};
+let ball ={};
 
 // GENERIC HELPERS -------------------------
 
 function getRandomDirection(){
     return Math.floor(Math.random()*2) === 0 ? -1 : 1;
 }
+
 function getPlayers(index){
-    var whatPlayer = undefined;
+    let whatPlayer = undefined;
 
     for(let id in players){
         if(index == 0 && players[id].x == 0) whatPlayer = players[id];
         if(index != 0 && players[id].x != 0) whatPlayer = players[id];
     }
 
-    return players[index];
+    return whatPlayer;
 }
 
 function onNewPlayer(socket, numberOfPlayers){
@@ -220,10 +224,10 @@ function update(){
         ball.velocityY = -ball.velocityY;
     }
     // Verificamos si la pelota golpea alguna pala...
-    var whatPlayer = (ball.x < CANVAS_WIDTH/2) ? getPlayers(0) : getPlayers(1);
+    let whatPlayer = (ball.x < CANVAS_WIDTH/2) ? getPlayers(0) : getPlayers(1);
     if (collision(ball,whatPlayer)){
         // Calculamos donde golpea la pelota en la pala
-        var collidePoint = ball.y - (whatPlayer.y+whatPlayer.height/2);
+        let collidePoint = ball.y - (whatPlayer.y+whatPlayer.height/2);
         // Normalizamos el punto de colisión
         collidePoint = collidePoint / (whatPlayer.height/2);
         // Calculamos el ángulo de rebote ( en radianes)
@@ -266,7 +270,7 @@ function next(){
 
 // HELPERS para gestionar el bucle de juego
 
-var gameLoopId; // Identificador del bucle de juego
+let gameLoopId; // Identificador del bucle de juego
 
 function gameLoop(){
     update();

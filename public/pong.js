@@ -36,8 +36,8 @@ const gameStateEnum = {
 // ---------------------------------------------------------
 // CLIENTE websocket del Network Engine
 // ---------------------------------------------------------
-const WEBSOCKET_SERVER = '';
-var socket;
+const WEBSOCKET_SERVER = 'ws://localhost:3000'; //?¿?¿?¿? ws://localhost:3000 para sacar el hostname -> $hostname -i
+let socket;
 
 function initServerConection(){
     //Iniciamos la conexion con el servidor de websocket
@@ -62,10 +62,10 @@ const CANVAS_WIDTH = cvs.width;
 const CANVAS_HEIGHT = cvs.height;
 
 // Declaramos los objetos del juego
-var gameState = gameStateEnum.SYNC;
-const players = {};
-var ball ={};
-var localPlayer = {};
+let gameState = gameStateEnum.SYNC;
+let players = {};
+let ball ={};
+
 
 // // GENERIC HELPERS -------------------------
 
@@ -160,10 +160,10 @@ var localPlayer = {};
 //         ball.velocityY = -ball.velocityY;
 //     }
 //     // Verificamos si la pelota golpea alguna pala...
-//     var whatPlayer = (ball.x < CANVAS_WIDTH/2) ? getPlayers(0) : getPlayers(1);
+//     let whatPlayer = (ball.x < CANVAS_WIDTH/2) ? getPlayers(0) : getPlayers(1);
 //     if (collision(ball,whatPlayer)){
 //         // Calculamos donde golpea la pelota en la pala
-//         var collidePoint = ball.y - (whatPlayer.y+whatPlayer.height/2);
+//         let collidePoint = ball.y - (whatPlayer.y+whatPlayer.height/2);
 //         // Normalizamos el punto de colisión
 //         collidePoint = collidePoint / (whatPlayer.height/2);
 //         // Calculamos el ángulo de rebote ( en radianes)
@@ -189,8 +189,11 @@ var localPlayer = {};
 //     }
 // }
 
-function update(){
-    //por hacer
+function update(gameObjects){
+    players = gameObjects.players;
+    players[socket.id].color = 'RED';
+    ball = gameObjects.ball;
+    gameState = gameObjects.gameState;
 }
 
 function render(){
@@ -198,13 +201,16 @@ function render(){
         drawText('PAUSA', CANVAS_WIDTH/4, CANVAS_HEIGHT/2, 'GREEN');
         return;
     }
-    if(gameState === gameStateEnum.PAUSE){
+    if(gameState === gameStateEnum.SYNC){
         drawText('Esperando rival...', CANVAS_WIDTH/4, CANVAS_HEIGHT/2, 'GREEN');
         return;
     }
     drawBoard();
-    drawPaddle(getPlayers(0));
-    drawPaddle(getPlayers(1));
+    //drawPaddle(getPlayers(0));
+    //drawPaddle(getPlayers(1));
+    for(let id in players){
+        drawPaddle(players[id]);
+    }
     drawBall(ball);
     drawScore(players);
     if (gameState === gameStateEnum.END){
@@ -217,27 +223,25 @@ function next(){
     if(gameState === gameStateEnum.END){
         console.log('Game Over');
         stopGameLoop();
+        socket.disconnect(); //posible
         return;
-    }
-    if ((getPlayers(0).score>=NUM_BALLS) || (getPlayers(1).score>=NUM_BALLS)){
-        gameState = gameStateEnum.END;
     }
 }
 
 
 // HELPERS para gestionar el bucle de juego
 
-var gameLoopId; // Identificador del bucle de juego
+let gameLoopId; // Identificador del bucle de juego
 
 function gameLoop(){
-    update();
+    //update();
     render();
     next();
 }
 
 function initGameLoop(){
     gameLoopId = setInterval(gameLoop, 1000/FRAME_PER_SECOND);
-    gameState = gameStateEnum.PLAY;
+    //gameState = gameStateEnum.PLAY;
 }
 
 function stopGameLoop(){
@@ -246,18 +250,23 @@ function stopGameLoop(){
 
 // INICIALIZACIÓN DEL MOTOR DE JUEGO
 // CAPTURA LOS MOVIMIENTOS DEL JUGADOR ( A TRAVÉS DEL EJE Y DEL RATÓN)
+
 function initPaddleMovement(){
     cvs.addEventListener("mousemove",(event) =>{
         if (gameState !== gameStateEnum.PLAY){
             return;
         }
+        let localPlayer = players[socket.id]; //puede que sea id minusculas
+
         const rect = cvs.getBoundingClientRect();
         localPlayer.y = event.clientY - rect.top - localPlayer.height/2;
+        socket.emit('move player', localPlayer.y);
     });
 }
 
 function init(){
-    initGameObjects();
+    // initGameObjects();
+    initServerConection();
     drawBoard();
     initPaddleMovement()
     initGameLoop();
